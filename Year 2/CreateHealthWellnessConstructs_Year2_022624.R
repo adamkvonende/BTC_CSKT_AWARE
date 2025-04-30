@@ -23,7 +23,7 @@ d <- d %>% rename(collection.timepoint=`collection timepoint`)
 d2 <- d %>% filter(aware_id !=".")
 
 
-# Create number of assessments variable
+# Create 'number of assessments' variable
 
 d2 <- d2 %>% group_by(aware_id) %>% arrange(collection.timepoint) %>% mutate(name_index = row_number())
 d2<-d2 %>% group_by(aware_id) %>% mutate(n_assess = max(name_index))
@@ -42,13 +42,12 @@ d2 <- d2 %>% dplyr::select(aware_id, date, date2, everything())
 
 ###  Age
 
-# View age related variables
-d2 %>% dplyr::select(contains("age")) %>% View()
+
 # remove all non-numeric characters
 d2$age2 <- gsub("[^0-9.]+", "", d2$age_2) # remove all non-numeric characters
 # convert to numeric
 d2$age2 <-as.numeric(d2$age2) 
-# Create approximate continuous age (9=)
+# Create approximate continuous age 
 d2 <- d2 %>% mutate(age_cont = case_when(age2<=9~age2+10,
                                      age2==10~25,
                                      age2==11~35,
@@ -61,7 +60,6 @@ d2 <- d2 %>% mutate(age.cat4 = case_when(age_cont<=20~1,
                                          age_cont>40~4))
 # Create a factor version of variable
 d2 <-d2 %>% mutate(age.cat4.f= factor(age.cat4))
-levels(d2$age.cat4.f) 
 levels(d2$age.cat4.f) <-    c("40+","30-40","20-30","10-20")               
 # Relevel the factor so youngest is first
 d2$age.cat4.f<-fct_relevel(d2$age.cat4.f, c("10-20","20-30", "30-40", "40+"))
@@ -81,7 +79,6 @@ d2 %>% tabyl(adult)
 
 ### Gender
 
-
 # convert to numeric
 
 d2$gender <-as.numeric(d2$gender1)
@@ -96,10 +93,6 @@ levels(d2$gender.3cat.f)
 
 ### Role
 
-
-
-# View all role vars
-d2 %>% select(contains("role")) %>% View()
 # convert role vars to numeric
 rolevars <- c("role_parent", "role_grandparent", "role_student", "role_teacher", "role_schooladmin", "role_para", "role_adultsuppyouth", "role_knowledgekeeper", "role_elder", "role_commember", "role_mhprovider", "role_apprentice", "role_other")
 d2 <- d2 %>% mutate_at(rolevars, function(x) as.numeric(x))
@@ -108,8 +101,6 @@ d2 <- d2 %>% mutate_at(rolevars, function(x) as.numeric(x))
 
 ### School
 
-# view all school related vars
-d2 %>% dplyr::select(contains("school")) %>% View()
 # convert to numeric
 d2 <- d2 %>% mutate_at("school", function(x) as.numeric(x))
 # create factor
@@ -132,9 +123,6 @@ d2 <- d2 %>% mutate_at(vars(contains("ethnicity")), function(x) ifelse(is.na(x),
 
 ### Race
 
-names(d2)
-
-d2 %>% select(contains("race")) %>% View()
 racevars <- c("race_indigenous", "race_white", "race_black", "race_hispanic", "race_other")
 d2 <- d2 %>% mutate_at(racevars , function(x) as.numeric(x))
 
@@ -173,6 +161,7 @@ all_vars <- c(tribal_connect_vars,native_identity_vars,overall_wellbeing_vars,so
 d2 <- d2 %>% mutate_at(all_vars, function(x) as.numeric(x))
 
 
+# Note: this will create scale scores for each set if <=30% of the items are missing
 
 # Tribal connect
 
@@ -208,7 +197,7 @@ tmp$miss_pct <- tmp$miss_count/length(social_support_vars)  # get % of missing i
 tmp$scale_score <- ifelse(tmp$miss_pct <=0.3,rowMeans(tmp[,social_support_vars],na.rm=T),NA_real_) # scale score is mean of items unless % missing > 30%
 d2$social_support_scale <- tmp$scale_score # add to main data set
 
-# Low mood -- this one is just the sum of the 2 variables
+# Low mood -- this one is just the sum of the 2 variables (this scale was eventually deprecated)
 
 
 tmp <- d2 %>% select(low_mood_vars) # create a temp data set
@@ -234,47 +223,14 @@ d2$low_mood_scale <- tmp$scale_score # add to main data set
 # }
 
 
-
-
 ######################################################################
 # Save the derived data set
 ######################################################################
 
-names(d2)
 setwd("C:/Users/vonbe/OneDrive/Adam/BCH Local/Other projects/CSKT Aware/Data/ConstructedDataSets")
 rio::export(d2, "CSKT_HealthWellnessConstructs_022624.xlsx")
 
 
-
-######################################################################
-# Descriptive table
-######################################################################
-
-
-
-tbl1 <-
-   d2 %>% ungroup() %>% 
-   select(age_cont, age.cat4.f, adult,gender.3cat.f,school.f,ethnicity_tribalmember,ethnicity_tribaldescendant, 
-          race_indigenous, race_white,race_black,race_hispanic,race_other,
-          role_parent,
-          role_grandparent,role_student,role_teacher,role_schooladmin,
-          role_para,role_adultsuppyouth,role_knowledgekeeper,
-          role_elder,role_commember,role_mhprovider,role_apprentice,
-          role_other) %>%
-   tbl_summary(by=adult,
-               statistic = list(all_continuous() ~ "{mean} ({sd})", 
-                                all_categorical() ~ "{n} ({p}%)"),
-               digits = list(all_continuous() ~ 1),
-               missing = "no")  %>% as_tibble()
-
-tbl1
-
-# Save as excel file
-
-
-
-setwd("C:/Users/vonbe/OneDrive/Adam/BCH Local/Other projects/CSKT Aware/Analyses/HealthWellness")
-rio::export(tbl1,"HealthWellnessDescrTable.xlsx")
 
 
 

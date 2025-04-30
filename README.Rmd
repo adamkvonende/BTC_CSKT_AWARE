@@ -21,17 +21,18 @@ knitr::opts_chunk$set(echo = TRUE,
 ```
 
 
-<p style="display: flex; align-items: center;">
-  <img src="C:/Users/vonbe/OneDrive/Adam/images.jpg" width="70" style="margin-right: 10px;">
-  <span style="font-size: 30px; font-weight: bold;">CSKT</span>
-</p>
+## 📋 Overview
 
+This repository contains R scripts for reproducing all analyses related to the CSKT AWARE project. It currently includes analyses for project years 2 and 3.
 
-## 📝 Overview
+## 🔄 Analysis Workflow
 
-This repository includes R coding files for reproducing all analyses for CSKT AWARE. Currently, the repo includes analyses for project years 2 and year 3.
+For each data source: 
 
-For each data type (e.g. survey), the data is first processed using a single R coding file. Mainly, this is for creating demographic variables and survey constructs, which are then combined and uses in anaysis. See the breakdown by year below
+1. Raw data is processed using dedicated R scripts 
+2. These scripts generate demographic variables and survey constructs 
+3. Processed data is then merged for comprehensive analyses 
+4. Results are compiled into structured Excel reports
 
 
 
@@ -44,11 +45,10 @@ For each data type (e.g. survey), the data is first processed using a single R c
 
 #### 🛠️ Processing scripts
 
-- `CreateCultureSurveyConstructs_Year2_022624.R`
-
-- `CreateHealthWellnessConstructs_Year2_022624.R`
-
 These scripts generate condensed data sets with demographic variables and survey constructs necessary for analysis.
+
+- `CreateCultureSurveyConstructs_Year2_022624.R`
+- `CreateHealthWellnessConstructs_Year2_022624.R`
 
 #### 📈 Analysis Script
 
@@ -65,4 +65,49 @@ This script produces a single 📊 Excel file containing the following outputs:
 
 
 ## 📅️️ Year 3 
+
+
+#### 🔍 Data sources
+
+1. 🌍 Culture survey 
+2. 🧘 Health/wellness survey
+3. 🔥 Encampment
+4. 🥁 Activity data 
+
+#### 🛠️ Processing scripts
+
+- `CreateDemosAcrossAllSources_041024.R` -- this combines demographic data across all sources 
+- `CreateCultureSurveyConstructs_Year3_160924.R`
+- `CreateHealthWellnessConstructs_Year3_151124.R`
+- `CreateEncampmentConstructs_Year3_121124.R`
+- `CreateActivityConstructs_Year3_280824.R`
+
+These scripts generate condensed data sets with demographic variables and survey constructs necessary for analysis.
+
+#### 📈 Analysis Script
+
+Subsequent analyses were performed using:​
+
+`DescriptiveAnalysis_Year3_151124.R`
+
+These analysis focus on 240 kids with activity data.
+
+This script produces a single 📊 Excel file containing the following outputs:
+
+1) Basic demographic table by district
+2) Means (SD) for each outcome, by district
+3) Correlation table for all outcomes
+
+Analyses were performed separately for 🔥️ encampment using `DescriptivesEncampment_311024.R`
+
+This script produces an 📊 Excel file containing the following outputs:
+
+1) Descriptives
+2) Outcome descriptives by pre and post
+3) Outcomes descriptives for youth
+4) Correlations of outcome scores among adults
+5) Correlations of outcomes scores among youth
+6) Item frequencies for adults
+7) Item frequencies for youth
+
 

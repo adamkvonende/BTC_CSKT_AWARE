@@ -9,12 +9,12 @@ years 2 and 3.
 
 ## 🔄 Analysis Workflow
 
-For each data source:
+1.  Raw data from each survey or data source is processed using
+    dedicated R scripts to create constructs for analysis.
 
-1.  Raw data is processed using dedicated R scripts
-2.  These scripts generate demographic variables and survey constructs
-3.  Processed data is then merged for comprehensive analyses
-4.  Results are compiled into structured Excel reports
+2.  The processed data is then merged, analysed, and the results are
+    compiled into Excel files, with multiple sheets corresponding to
+    each analysis
 
 ## 📅️ Year 2
 
@@ -59,7 +59,7 @@ Datasets – Adam -&gt; Analysis results*
 
 #### 🛠️ Processing scripts
 
--   `CreateDemosAcrossAllSources_041024.R` – this combines demographic
+-   `CreateDemosAcrossAllSources_050225.R` – this combines demographic
     data across all sources
 -   `CreateCultureSurveyConstructs_Year3_160924.R`
 -   `CreateHealthWellnessConstructs_Year3_151124.R`

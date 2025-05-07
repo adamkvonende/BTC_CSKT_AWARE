@@ -27,12 +27,10 @@ This repository contains R scripts for reproducing all analyses related to the C
 
 ## 🔄 Analysis Workflow
 
-For each data source: 
 
-1. Raw data is processed using dedicated R scripts 
-2. These scripts generate demographic variables and survey constructs 
-3. Processed data is then merged for comprehensive analyses 
-4. Results are compiled into structured Excel reports
+1. Raw data from each survey or data source is processed using dedicated R scripts to create constructs for analysis.
+
+2. The processed data is then merged, analysed, and the results are compiled into Excel files, with multiple sheets corresponding to each analysis
 
 
 

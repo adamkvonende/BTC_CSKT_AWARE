@@ -55,117 +55,6 @@ d3 <- d3 %>% arrange(aware_id, time)
 d3 <- d3 %>% filter(!is.na(aware_id))
 
 
-######################################################################
-# Create demographic variables
-######################################################################
-
-
-# Fill in age by ID
-d3 <- d3 %>% group_by(aware_id) %>% fill(age_2, .direction="updown")
-
-# remove all non-numeric characters
-d3$age2 <- gsub("[^0-9.]+", "", d3$age_2) # remove all non-numeric characters
-# convert to numeric
-d3$age2 <-as.numeric(d3$age2) 
-# Create approximate continuous age (9=)
-d3 <- d3 %>% mutate(age_cont = case_when(age2<=9~age2+10,
-                                         age2==10~25,
-                                         age2==11~35,
-                                         age2==12~45))
-
-# Create categories
-d3 <- d3 %>% mutate(age.cat4 = case_when(age_cont<=20~1,
-                                         age_cont>20&age_cont<=30~2,
-                                         age_cont>30&age_cont<=40~3,
-                                         age_cont>40~4))
-# Create a factor version of variable
-d3 <-d3 %>% mutate(age.cat4.f= factor(age.cat4,levels = c("1","2","3","4")))
-
-# expand levels as does not exist in data
-age.cat4.f<- fct_expand(c("1","2","3","4"))
-
-# relevel with missing level last
-levels(d3$age.cat4.f) <-    c("10-20", "20-30","30-40","40+")   
-
-# Relevel the factor so youngest is first
-d3$age.cat4.f<-fct_relevel(d3$age.cat4.f, c("10-20","20-30", "30-40", "40+"))
-
-
-### Adult
-
-
-d3 <- d3 %>% mutate(adult = ifelse(age_type==0,1,0))
-
-
-### Gender
-
-
-# convert to numeric
-
-d3$gender <-as.numeric(d3$gender)
-# Fill in
-d3 <- d3 %>% group_by(aware_id) %>% fill(gender, .direction="updown")
-
-# Create categories
-d3<- d3 %>% mutate(gender.3cat = case_when(gender==0~0,
-                                           gender==1~1,
-                                           TRUE~3))
-
-d3$gender.3cat.f <-factor(d3$gender.3cat, labels=c("Male", "Female", "Other"))
-levels(d3$gender.3cat.f)
-
-
-### Role
-
-# convert role vars to numeric
-# Fill in
-d3 <- d3 %>% group_by(aware_id) %>% fill(contains("role_"), .direction="updown")
-
-rolevars <- c("role_parent", "role_grandparent", "role_student", "role_teacher", "role_schooladmin", "role_para", "role_adultsuppyouth", "role_knowledgekeeper", "role_elder", "role_commember", "role_mhprovider", "role_apprentice", "role_other")
-d3 <- d3 %>% mutate_at(rolevars, function(x) as.numeric(x))
-
-
-
-### School
-
-# convert to numeric
-d3 <- d3 %>% mutate_at("school", function(x) as.numeric(x))
-# Change 0 (other) to 8
-d3 <- d3 %>% mutate(school = ifelse(school==0,8,school))
-# Fill in
-d3 <- d3 %>% group_by(aware_id) %>% fill(school, .direction="updown")
-
-
-# create factor
-d3 <-d3 %>% mutate(school.f = factor(school,levels = c("1","2", "3", "4","5", "6", "7", "8","9", "10")))
-levels(d3$school.f)
-levels(d3$school.f)<-c(
-  "Mission Middle School",
-  "Mission High School",
-  "Polson Middle School",
-  "Polson High School",
-  "Ronan Middle School",
-  "Ronan High School",
-  "Arlee Middle School",
-  "Arlee High school",
-  "Two Eagle River School",
-  "Other"
-)
-
-
-###  Ethnicity
-
-# convert to numeric
-
-d3 <- d3 %>% mutate_at(vars(contains("ethnicity")), function(x) as.numeric(x))
-
-# Fill in missing with zeroes
-
-d3 <- d3 %>% mutate_at(vars(contains("ethnicity")), function(x) ifelse(is.na(x),0,x))
-# Fill in
-d3 <- d3 %>% group_by(aware_id) %>% fill(contains("ethn"), .direction="updown")
-
-
 
 ######################################################################
 # Replace missing and make numeric
@@ -198,7 +87,7 @@ scale.categories <- list(fam_overall = c("q5a1_fam_lang_salish", "q5a2_fam_lang_
                          fam_trad_practices=c("q6g1_fam_smud", "q6g3_fam_med", "q6g4_fam_fast", "q6g5_fam_bur", "q6g6_fam_celeb", "q6g7_fam_pray", "q6g12_fam_cult", "q6g13_fam_fea", "q5h9_fam_name"),
                          fam_trad_games=c("q6h1_fam_hand", "q5i2_fam_hoop", "q5i3_fam_atl", "q5i4_fam_rock", "q6h3_fam_ball", "q6h4_fam_shin", "q5i7_fam_run"),
                          fam_trad_foods=c("q5j1_fam_bread", "q5j2_fam_fish", "q5j3_fam_meat", "q5j4_fam_root", "q6i12_fam_tea", "q5j6_fam_berry", "q5j7_fam_bark", "q5j8_fam_ack", "q5j9_fam_sap", "q5j10_fam_lich"),
-                         #part=c("q6_part_lang", "q6_part_land", "q6_part_story", "q6_part_song", "q6_part_mat", "q6_part_round", "q6_part_dance", "q6_part_pract", "q6_part_game", "q6_part_food"),
+                         part=c("q6_part_lang", "q6_part_land", "q6_part_story", "q6_part_song", "q6_part_mat", "q6_part_round", "q6_part_dance", "q6_part_pract", "q6_part_game", "q6_part_food"),
                          comf=c("q7_comf_lang", "q7_comf_land", "q7_comf_story", "q7_comf_song", "q7_comf_mat", "q7_comf_round", "q7_comf_dance", "q7_comf_pract", "q7_comf_game", "q7_comf_food"),
                          connect=c("q8_connect"),
                          learn=c("q9_learn_lang", "q9_learn_land", "q9_learn_story", "q9_learn_song", "q9_learn_mat", "q9_learn_round", "q9_learn_dance", "q9_learn_pract", "q9_learn_game", "q9_learn_food"),
@@ -216,17 +105,28 @@ d3 <- d3 %>% mutate_at(scale.categories$part, funs(case_when(.==0~0, .==1~0.05, 
 
 # Now create a scale for each category
 
+curr.cat <- c("q8_connect")
+
 # Note: This function returns the row-wise mean across all items if <=30% of the items are missing
 
 for (i in 1:length(scale.categories)) {
   curr.cat <- scale.categories[[i]]
-  tmp<-d3[, curr.cat]
-  nvars<-ncol(tmp)
-  tmp$miss_count <- rowSums(is.na(tmp)) 
-  tmp$miss_pct <- tmp$miss_count/nvars
-  scale_name <- names(scale.categories)[i]
-  d3[, paste0("culture_", scale_name,"_scale")] =   ifelse(tmp$miss_pct <=0.3,rowMeans(tmp[,1:nvars],na.rm=T),NA_real_)
+  tmp <- d3[, curr.cat, drop = FALSE]
+  nvars <- ncol(tmp)
   
+  tmp$miss_count <- rowSums(is.na(tmp))
+  tmp$miss_pct <- tmp$miss_count / nvars
+  scale_name <- names(scale.categories)[i]
+  
+  if (nvars == 1) {
+    # Only one item - just use the value if not too much missing
+    d3[, paste0("culture_", scale_name, "_scale")] <- ifelse(tmp$miss_pct <= 0.3, tmp[[1]], NA_real_)
+  } else {
+    # Multiple items - take row mean
+    d3[, paste0("culture_", scale_name, "_scale")] <- ifelse(tmp$miss_pct <= 0.3,
+                                                             rowMeans(tmp[, 1:nvars], na.rm = TRUE),
+                                                             NA_real_)
+  }
 }
 
 # Create sum for participant variables
@@ -245,15 +145,7 @@ d3$date_culture <- d3$date
 
 ### Save data set
 
-to_keep <- c("aware_id","combined_name", "date_culture", "race_native", "race_white", 
-             "race_black", "race_hispanic", "race_other", "race_selfdescribe", 
-             "ethnicity_tribalmember", "ethnicity_tribaldescendant", "ethnicity_tribe_no", 
-             "race_tribe", "school", "role_parent", 
-             "role_grandparent", "role_teacher", "role_schooladmin", "role_para", 
-             "role_adultsuppyouth", "role_knowledgekeeper", "role_elder", 
-             "role_commember", "role_mhprovider", "role_apprentice", "role_student", 
-             "role_other", "role_other_describe","age_cont", "age.cat4", "age.cat4.f", "adult", "gender.3cat", 
-             "gender.3cat.f","school", "school.f", "culture_part_sum", "culture_fam_overall_scale", 
+to_keep <- c("aware_id", "culture_part_sum", "culture_fam_overall_scale", 
              "culture_fam_speak_scale", "culture_fam_trad_landscapes_scale", 
              "culture_fam_storytelling_scale", "culture_fam_songs_scale", 
              "culture_fam_trad_materials_scale", "culture_fam_seasonal_rounds_scale", 

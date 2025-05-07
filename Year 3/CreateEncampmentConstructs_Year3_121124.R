@@ -43,134 +43,8 @@ d <- bind_rows(d1,d2)
 #names(d)
 
 d <- d %>% arrange(aware_id, time)
-######################################################################
-# Create demographic variables
-######################################################################
-
-# adult
-
-d <- d %>%
-  mutate(adult = case_when(
-    str_starts(aware_id, "y") ~ 0,
-    str_starts(aware_id, "a") ~ 1,
-    TRUE ~ NA_real_  # Assign NA if it starts with something else
-  ))
 
 
-d %>% tabyl(adult)
-
-###  Age
-
-# View age related variables
-#d %>% dplyr::select(aware_id, contains("age")) %>% View()
-# Fill in
-d <- d %>% group_by(aware_id) %>% fill(age, .direction="updown")
-# Create approximate continuous age (9=)
-d <- d %>% mutate(age_cont = case_when(age<=9~age+10,
-                                         age==10~25,
-                                         age==11~35,
-                                         age==12~45))
-
-# Create categories
-d <- d %>% mutate(age.cat4 = case_when(age_cont<=20~1,
-                                         age_cont>20&age_cont<=30~2,
-                                         age_cont>30&age_cont<=40~3,
-                                         age_cont>40~4))
-# Create a factor version of variable
-d <-d %>% mutate(age.cat4.f= factor(age.cat4))
-#levels(d$age.cat4.f) 
-# expand levels as does not exist in data
-age.cat4.f<- fct_expand(c("1","2","3","4"))
-
-# relevel with missing level last
-levels(d$age.cat4.f) <-    c("10-20","40+","30-40", "20-30")   
-
-
-# Relevel the factor so youngest is first
-d$age.cat4.f<-fct_relevel(d$age.cat4.f, c("10-20","20-30", "30-40", "40+"))
-
-
-
-
-### Gender
-
-
-# convert to numeric
-
-d$gender <-as.numeric(d$gender)
-# Fill in
-d <- d %>% group_by(aware_id) %>% fill(gender, .direction="updown")
-
-# Create categories
-d<- d %>% mutate(gender.3cat = case_when(gender==0~0,
-                                           gender==1~1,
-                                           TRUE~3))
-
-d$gender.3cat.f <-factor(d$gender.3cat,levels = c(0, 1, 3), labels=c("Male", "Female", "Other"))
-#levels(d$gender.3cat.f)
-
-
-### Role
-
-# View all role vars
-#d %>% select(aware_id, time, contains("role")) %>% View()
-# Fill in
-d <- d %>% group_by(aware_id) %>% fill(contains("role_"), .direction="updown")
-
-# convert role vars to numeric
-rolevars <- c("role_parent", "role_grandparent", "role_student", "role_teacher", "role_schooladmin", "role_para", "role_adultsuppyouth", "role_knowledgekeeper", "role_elder", "role_commember", "role_mhprovider", "role_apprentice", "role_other")
-d <- d %>% mutate_at(rolevars, function(x) as.numeric(x))
-
-
-
-### School
-
-### School
-# view all school related vars
-#d %>% dplyr::select(contains("school")) %>% View()
-# convert to numeric
-d <- d %>% mutate_at("school", function(x) as.numeric(x))
-# Fill in
-d <- d %>% group_by(aware_id) %>% fill(school, .direction="updown")
-# other = missing
-d <- d %>% mutate(school = ifelse(school %in% c(0,8), 10,school))
-
-# create factor
-d <-d %>% mutate(school.f = factor(school,levels = c("1","2", "3", "4","5", "6", "7", "8","9", "10")))
-levels(d$school.f)
-levels(d$school.f)<-c(
-  "Mission Middle School",
-  "Mission High School",
-  "Ronan Middle School",
-  "Ronan High School",
-  "Mission elementary",
-  "Polson Middle School",
-  "Polson High School",
-  "Arlee Middle School",
-  "Arlee High school",
-  "Other"
-)
-
-d$school_encamp <- d$school
-
-###  Ethnicity
-
-# convert to numeric
-
-#d %>% dplyr::select(contains("ethn")) %>% View()
-
-d <- d %>% mutate_at(vars(contains("ethnicity")), function(x) as.numeric(x))
-
-# Fill in
-d <- d %>% group_by(aware_id) %>% fill(contains("ethn"), .direction="updown")
-
-
-# Fill in missing with zeroes
-
-#d <- d %>% mutate_at(vars(contains("ethnicity")), function(x) ifelse(is.na(x),0,x))
-
-d %>% tabyl(adult, time)
-d %>% filter(time=="pre") %>% tabyl(adult)
 ######################################################################
 # Scale items
 ######################################################################
@@ -221,7 +95,7 @@ d <-d %>% mutate_at(scale.items,function(x) floor(x)) # use lower if intermediat
 # Create scales
 ######################################################################
 
-dput(names(d))
+
 
 scale.categories <- list(fam_encamp = c("familiar_languages", "familiar_landscapes", "familiar_storytelling", 
                          "familiar_songs", "familiar_materials", "familiar_rounds", "familiar_dancing", 
@@ -325,19 +199,8 @@ dput(names(d))
 
 scales <- grep("_scale", names(d), value = TRUE)
 
-to_keep <- c("aware_id", "combined_name", "time", "adult", "age","age_cont", "age.cat4", "age.cat4.f", "age_type", 
-             "gender", "gender_describe", "gender.3cat","gender.3cat.f", 
-             "school_encamp", "school_other", "school.f",
-             "race_native", "race_asian", "race_black", "race_hispanic", "race_middleeastern", 
-             "race_hawaiian", "race_white", "race_other", "race_selfdescribe", 
-             "ethnicity_tribalmember", "ethnicity_tribaldescendent", "ethnicity_tribe_no", 
-             "race_tribe","role_parent", "role_grandparent", "role_student", "role_teacher", 
-             "role_schooladmin", "role_para", "role_adultsuppyouth", "role_knowledgekeeper", 
-             "role_elder", "role_commember", "role_mhprovider", "role_apprentice", 
-             "role_other", "role_other_describe",
-             "role_other", "role_other_describe","feel_connected", "speak_selis", "understand_selis", "speak_ksanka", 
-             "understand_ksanka",scales,
-             all_of(scale.items)
+to_keep <- c("aware_id", "time", "feel_connected", "speak_selis", "understand_selis", "speak_ksanka", 
+             "understand_ksanka",scales,all_of(scale.items)
              )
 
 d2 <- d %>% select(all_of(to_keep))

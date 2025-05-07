@@ -29,13 +29,12 @@ demo_vars <- c("race_native", "race_white",
 # Health and wellness survey 
 setwd("C:/Users/vonbe/OneDrive/Adam/BCH Local/Other projects/CSKT Aware/Data/ConstructedDataSets")
 a<- rio::import("CSKT_HealthWellnessConstructs_Year3_191124.xlsx")
-a2 <- a %>% select(aware_id,time, !all_of(demo_vars))
+
 
 
 # Culture survey 
 b <- rio::import("CSKT_CultureSurveyConstructs_Year3_180924.xlsx")
 b <- b %>% mutate(race_asian=NA,race_middleeastern=NA, race_hawaiian=NA )
-b2 <- b %>% select(aware_id, !all_of(demo_vars))
 
 
 
@@ -45,22 +44,22 @@ e2 <- e %>% select(-gender,-native,school_act=school)
 
 
 
-# Demographic data (from CreateDemosAcrossAllSources_041024.R)
+# Demographic data (from CreateDemosAcrossAllSources_020525.R)
 
 setwd("C:/Users/vonbe/OneDrive/Adam/BCH Local/Other projects/CSKT Aware/Data/ConstructedDataSets")
-f <- rio::import("CSKT_DemoConstructs_200924.csv")
+f <- rio::import("CSKT_DemoConstructs_020525.xlsx")
 
 
 # set up base data with pre and post for all individuals -- then we merge in
 
-unique_ids <- unique(c(a2$aware_id, b2$aware_id))
+unique_ids <- unique(c(a$aware_id, b$aware_id))
 df <- data.frame(aware_id=rep(unique_ids, each=2))
 df$time <- rep(c("pre", "post"), times=length(unique_ids))
 
 # Merge in other datasets
 
-d <- df %>% left_join(a2, by=c("aware_id", "time"))
-d <- d %>% left_join(b2, by=c("aware_id", "time"))
+d <- df %>% left_join(a, by=c("aware_id", "time"))
+d <- d %>% left_join(b, by=c("aware_id", "time"))
 d <- d %>% left_join(e2, by=c("aware_id"))
 d <- d %>% left_join(f, by=c("aware_id"))
 
@@ -75,8 +74,6 @@ d2 <- d %>% mutate(time2 = ifelse(time=="pre",1,2)) %>% select(aware_id, time2, 
 d2 <- d2 %>% arrange(aware_id, time2)
 # Tag first instance of AWARE ID
 d2 <- d2 %>% arrange(aware_id, time2) %>% group_by(aware_id) %>% mutate(tag_id = if_else(row_number()==1,1,0))
-# Tag if individual has any encampent data
-d2 <- d2 %>% mutate(any_encampment = ifelse(aware_id %in% c$aware_id,1,0))
 
 
 ######################################################################
@@ -196,7 +193,7 @@ wb <- createWorkbook()
 covars <- c("district",  "grade_actual", 
             "age_cont",  
             "gender.3cat.f", "race_native", "race_white", "race_black", "race_hispanic", 
-            "race_other", "race_asian", "race_middleeastern", "race_hawaiian", 
+            "race_other", 
             "ethnicity_tribalmember", "ethnicity_tribaldescendant", 
             "ethnicity_tribe_no",
             "any_tier1", "any_tier2", 

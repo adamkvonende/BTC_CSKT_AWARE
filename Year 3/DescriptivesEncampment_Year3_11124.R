@@ -8,11 +8,6 @@ p_load(rio, dplyr, tidyverse,janitor,psych, gtsummary,officer,flextable,
        summarytools,descr, readxl,ggview,ggpubr)
 
 
-source("C:\\Users\\vonbe\\OneDrive\\Adam\\NDPH Local\\Stats Local\\R code Collection\\repath.R")
-source("C:/Users/vonbe/OneDrive/Adam/Stats Local/R code Collection/GTsummaryGlobalOpts.R")
-
-
-
 # survey vars
 scale.items <-c("familiar_languages", "familiar_landscapes", "familiar_storytelling", 
                 "familiar_songs", "familiar_materials", "familiar_rounds", "familiar_dancing", 
@@ -162,7 +157,6 @@ wb
 ######################################################################
 
 
-names(d)
 
 outcomes <- names(d)[grep("scale", names(d))]
 outcomes
